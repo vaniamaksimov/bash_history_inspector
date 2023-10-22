@@ -1,30 +1,38 @@
 import platform
-from dataclasses import dataclass
+from typing import Any
 
 
-@dataclass
 class ArgumentParserLexicon:
     program_name = {
         'en_US': 'Bash history inspector',
         'ru_RU': 'Испектор bash истории',
     }
 
+    def __init__(self, user_language: str) -> None:
+        self.__user_language = user_language
+
+    def __getattribute__(self, __name: str) -> Any:
+        attr = object.__getattribute__(self, __name)
+        if isinstance(attr, dict) and not __name.startswith('_'):
+            return attr[self.__user_language]
+        return attr
+
 
 class Lexicon:
     def __init__(self, user_language: str) -> None:
-        self.user_language = user_language
+        self.argument_parser = ArgumentParserLexicon(user_language)
 
 
-if platform.system() in ('Linux', 'Darwin'):
-    import os
+def get_lexicon() -> Lexicon:
+    if platform.system() in ('Linux', 'Darwin'):
+        import os
 
-    user_language = os.getenv('LANG').split('.')[0]
-    lexicon = ...
-else:
-    import ctypes
-    import locale
+        user_language = os.getenv('LANG').split('.')[0]
+    else:
+        import ctypes
+        import locale
 
-    user_language = locale.windows_locale[ctypes.windll.GetUserDefaultUILanguage()]
-    lexicon = ...
+        windll = ctypes.windll.kernel32
+        user_language = locale.windows_locale[windll.GetUserDefaultUILanguage()]
 
-lexicon = Lexicon()
+    return Lexicon(user_language)
