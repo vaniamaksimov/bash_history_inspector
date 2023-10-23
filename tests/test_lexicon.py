@@ -1,8 +1,9 @@
-import platform
+import locale
 
 import pytest
+from _pytest.fixtures import SubRequest
 
-from lexicon import Lexicon
+from lexicon import Lexicon, get_lexicon
 
 
 @pytest.mark.parametrize(
@@ -14,9 +15,15 @@ def test_lexicon_give_text_respect_user_locale(locale: str, expected_result: str
     assert lexicon.argument_parser.program_name == expected_result
 
 
-@pytest.mark.skipif(
-    lambda _: platform.system() not in ('Linux', 'Darwin'), reason='dont work on Windows'
-)
 class TestGetLexicon:
-    def test_get_lexicon(self):
-        ...
+    @pytest.fixture
+    def locale_(self, request: SubRequest):
+        current_locale, _ = locale.getlocale()
+        locale.setlocale(locale.LC_ALL, request.param)
+        yield request.param
+        locale.setlocale(locale.LC_ALL, current_locale)
+
+    @pytest.mark.parametrize('locale_', ('en_US', 'ru_RU'), indirect=True)
+    def test_get_lexicon(self, locale_: str):
+        lexicon = get_lexicon()
+        assert lexicon.argument_parser._ArgumentParserLexicon__user_locale == locale_
