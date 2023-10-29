@@ -1,6 +1,6 @@
 import pytest
 
-from lexicon import Lexicon, LexiconContainer
+from app.lexicon import Lexicon, LexiconContainer
 
 
 class FakeLexiconContainer(LexiconContainer):

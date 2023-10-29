@@ -10,11 +10,12 @@ logging_config = {
             'level': 'INFO',
             'handlers': ['default'],
         },
-        'main': {
+        'application': {
             'level': 'INFO',
             'handlers': ['default'],
             'propagate': False,
         },
+        'config': {'level': 'INFO', 'handlers': ['default'], 'propagate': False},
     },
     'handlers': {
         'default': {
