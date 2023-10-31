@@ -2,7 +2,8 @@ from argparse import ArgumentParser
 
 from lexicon import lexicon
 from logger import get_logger
-from utils.actions import CronTime
+
+# from utils.actions import CronTime
 
 log = get_logger('config')
 
@@ -20,8 +21,8 @@ class Config:
         self.argument_parser.prog = lexicon.argument_parser.program_name
         self.argument_parser.description = lexicon.argument_parser.program_description
         self.argument_parser.epilog = lexicon.argument_parser.program_epilog
-        subparsers = self.argument_parser.add_subparsers()
+        subparsers = self.argument_parser.add_subparsers(dest='command')
         cron_parser = subparsers.add_parser('cron')
-        cron_parser.add_argument('--cron', dest='cron', type=CronTime)
+        cron_parser.add_argument('--cron', dest='cron')
         history_parser = subparsers.add_parser('history')
         history_parser.add_argument('--number')

@@ -25,7 +25,7 @@ filterwarnings = ["ignore:DeprecationWarning",]
 norecursedirs = [".venv",]
 python_files = ["test_*.py",]
 python_functions = ["test_*",]
-pythonpath = [".",]
+pythonpath = [".", "app"]
 addopts = ["-vv", "-p", "no:cacheprovider", "--tb=long", "-s"]
 disable_test_id_escaping_and_forfeit_all_rights_to_community_support = "True"
 markers = []

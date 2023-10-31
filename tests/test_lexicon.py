@@ -8,7 +8,7 @@ from tests.conftest import FakeLexicon
 
 @pytest.mark.parametrize(
     argnames=('locale', 'expected_result'),
-    argvalues=(('en_US', 'Bash history inspector'), ('ru_RU', 'Испектор bash истории')),
+    argvalues=(('en_US', 'Bash history inspector'), ('ru_RU', 'Инспектор bash истории')),
 )
 def test_lexicon_give_text_respect_user_locale(
     locale: str, expected_result: str, fake_lexicon: type[FakeLexicon]
