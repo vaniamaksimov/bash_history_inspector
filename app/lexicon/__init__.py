@@ -40,6 +40,7 @@ class ArgumentParserLexicon(LexiconContainer):
         'ru_RU': 'Читает историю bash команд и ищет команды способные привести в взлому',
     }
     program_epilog = {'en_US': 'CLI arguments:', 'ru_RU': 'Аргументы командной строки'}
+    mode_selection = {'en_US': 'Operating mode selection', 'ru_RU': 'Выбор режима работы'}
 
 
 class Lexicon:

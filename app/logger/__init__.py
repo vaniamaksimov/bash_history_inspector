@@ -15,7 +15,7 @@ logging_config = {
             'handlers': ['default'],
             'propagate': False,
         },
-        'config': {'level': 'INFO', 'handlers': ['default'], 'propagate': False},
+        'cli_parser': {'level': 'INFO', 'handlers': ['default'], 'propagate': False},
     },
     'handlers': {
         'default': {

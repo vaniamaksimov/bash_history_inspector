@@ -1,6 +1,6 @@
 from types import TracebackType
 
-from config import Config
+from cli import CliParser
 from lexicon import lexicon
 from logger import get_logger
 
@@ -8,16 +8,16 @@ log = get_logger('application')
 
 
 class Application:
-    def __init__(self, config: type[Config]) -> None:
+    def __init__(self, cli_parser: type[CliParser]) -> None:
         log.info(lexicon.logger.init_application)
-        self.config = config()
+        self.cli_parser = cli_parser()
 
     def _check_user_os(self):
         ...
 
     def _read_user_input(self):
         log.info(lexicon.logger.start_reading_user_input)
-        args = self.config.argument_parser.parse_args()
+        args = self.cli_parser.parse()
         args
 
     def start(self):

@@ -1,8 +1,7 @@
-from argparse import ArgumentParser
-
 import pytest
 
-from app.config import Config
+from app.application import Application
+from app.cli import CliParser
 from app.lexicon import Lexicon, LexiconContainer
 
 
@@ -24,10 +23,10 @@ def fake_lexicon() -> type[FakeLexicon]:
 
 
 @pytest.fixture
-def config() -> Config:
-    return Config()
+def application() -> Application:
+    return Application(cli_parser=CliParser)
 
 
 @pytest.fixture
-def argument_parser(config: Config) -> ArgumentParser:
-    return config.argument_parser
+def argument_parser(application: Application) -> CliParser:
+    return application.cli_parser
