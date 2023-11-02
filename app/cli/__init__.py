@@ -23,7 +23,7 @@ class CliParser:
             dest='command', help=lexicon.argument_parser.mode_selection
         )
         cron_parser = subparsers.add_parser('cron')
-        cron_parser.add_argument('-c', '--cron', dest='cron')
+        cron_parser.add_argument('-m', '--minutes', dest='minutes', choices=[5, 15, 30], type=int)
         subparsers.add_parser('history')
 
     def parse(self) -> Namespace:

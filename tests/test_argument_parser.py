@@ -12,5 +12,6 @@ def test_argument_parser(argument_parser: CliParser, command: list[str], expecte
 
 
 def test_cron_parser(argument_parser: CliParser):
-    namespace = argument_parser.argument_parser.parse_args(['cron', '-c', '30m'])
-    assert namespace.cron == '30m'
+    namespace = argument_parser.argument_parser.parse_args(['cron', '-m', '5'])
+    assert namespace.command == 'cron'
+    assert namespace.minutes == 5
