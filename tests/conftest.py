@@ -1,3 +1,7 @@
+from pathlib import Path
+from typing import Callable
+from uuid import UUID, uuid4
+
 import pytest
 
 from app.application import Application
@@ -30,3 +34,27 @@ def application() -> Application:
 @pytest.fixture
 def argument_parser(application: Application) -> CliParser:
     return application.cli_parser
+
+
+@pytest.fixture
+def uuid() -> Callable[[], UUID]:
+    def fabric() -> UUID:
+        return uuid4()
+
+    return fabric
+
+
+@pytest.fixture
+def filename(uuid: Callable[[], UUID]) -> str:
+    name = f'test_file_{uuid()}'
+    yield name
+    (Path.home() / name).unlink(missing_ok=True)
+
+
+@pytest.fixture
+def file_with_text(filename: str) -> tuple[Path, str]:
+    dest = Path.home() / filename
+    text = 'autotest'
+    dest.touch()
+    dest.write_text(text)
+    return filename, text
