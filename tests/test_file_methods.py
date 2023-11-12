@@ -35,5 +35,17 @@ def test_file_contains_text_method(
     assert result == expected_result
 
 
-def test_replace_line_with_text_method():
-    ...
+def test_replace_line_with_text_method(application: Application, file_with_text: tuple[Path, str]):
+    file_name, text = file_with_text
+    dest = Path.home() / file_name
+    application._replace_line_with_text(dest, text)
+    file_text = dest.read_text()
+    assert file_text == 'HISTTIMEFORMAT="%d/%m/%y %T "'
+
+
+def test_apend_text_to_file(application: Application, file_with_text: tuple[Path, str]):
+    file_name, text = file_with_text
+    dest = Path.home() / file_name
+    application._append_text_to_file(dest)
+    file_text = dest.read_text()
+    assert file_text == 'autotest\nHISTTIMEFORMAT="%d/%m/%y %T "'

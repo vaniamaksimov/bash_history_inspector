@@ -1,4 +1,5 @@
 import fileinput
+import subprocess
 import sys
 from pathlib import Path
 from types import TracebackType
@@ -65,7 +66,12 @@ class Application:
         self, file: Path | str, text: str = 'HISTTIMEFORMAT="%d/%m/%y %T "'
     ) -> None:
         with open(file, 'a') as file_:
+            file_.write('\n')
             file_.write(text)
+
+    def _get_history_logs(self) -> list[str]:
+        result = subprocess.run('history')
+        return result.stdout.decode().split('\n')
 
     def _start_mode(self):
         ...
