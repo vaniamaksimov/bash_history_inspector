@@ -1,6 +1,6 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class ApplicationMode(StrEnum):
+class ApplicationMode(str, Enum):
     CRON = 'cron'
     HISTORY = 'history'

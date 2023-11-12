@@ -3,13 +3,13 @@ import subprocess
 import sys
 from pathlib import Path
 from types import TracebackType
-from typing import assert_never
 
-from cli import CliParser
-from lexicon import lexicon
-from logger import get_logger
-
+from app.cli import CliParser
 from app.config import Config
+from app.lexicon import lexicon
+from app.logger import get_logger
+from app.models.log import Log
+from app.models.log_container import LogContainer
 from app.utils.application_types import ApplicationMode
 
 log = get_logger('application')
@@ -36,7 +36,7 @@ class Application:
             case ApplicationMode.HISTORY:
                 config.mode = ApplicationMode.HISTORY
             case _ as unreachable:
-                assert_never(unreachable)
+                raise AssertionError(unreachable)
 
     def _create_file_if_not_exists(self, filename: str = '.bashrc') -> Path:
         file = Path.home() / filename
@@ -70,8 +70,21 @@ class Application:
             file_.write(text)
 
     def _get_history_logs(self) -> list[str]:
-        result = subprocess.run('history')
-        return result.stdout.decode().split('\n')
+        cmd = subprocess.Popen(
+            'bash -i -c \'history -r;history\' ',
+            shell=True,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        result, _ = cmd.communicate()
+        return list(map(str.strip, result.decode().splitlines()))
+
+    def _convert_raw_logs_to_log_container(self, raw_logs: list[str]) -> LogContainer:
+        container = LogContainer()
+        for raw_log in raw_logs:
+            container.append(Log.from_string(raw_log))
+        return container
 
     def _start_mode(self):
         ...
@@ -104,4 +117,5 @@ class Application:
 
 
 if __name__ == '__main__':
-    ...
+    app = Application(CliParser)
+    print(app._get_history_logs())

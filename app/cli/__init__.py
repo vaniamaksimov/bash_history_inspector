@@ -1,7 +1,7 @@
 from argparse import ArgumentParser, Namespace
 
-from lexicon import lexicon
-from logger import get_logger
+from app.lexicon import lexicon
+from app.logger import get_logger
 
 log = get_logger('cli_parser')
 
