@@ -48,4 +48,4 @@ def test_apend_text_to_file(application: Application, file_with_text: tuple[Path
     dest = Path.home() / file_name
     application._append_text_to_file(dest)
     file_text = dest.read_text()
-    assert file_text == 'autotest\nHISTTIMEFORMAT="%d/%m/%y %T "'
+    assert file_text == f'{text}\nHISTTIMEFORMAT="%d/%m/%y %T "'
