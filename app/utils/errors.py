@@ -8,3 +8,7 @@ class GetHistoryError(ApplicationError):
 
 class LogParseError(ApplicationError):
     ...
+
+
+class NotSupportedOsError(ApplicationError):
+    ...

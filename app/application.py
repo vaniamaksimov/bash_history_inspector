@@ -1,4 +1,5 @@
 import fileinput
+import platform
 import subprocess
 import sys
 from pathlib import Path
@@ -11,6 +12,7 @@ from app.logger import get_logger
 from app.models.log import Log
 from app.models.log_container import LogContainer
 from app.utils.application_types import ApplicationMode
+from app.utils.errors import NotSupportedOsError
 
 log = get_logger('application')
 config = Config()
@@ -22,9 +24,8 @@ class Application:
         self.cli_parser = cli_parser()
 
     def _check_user_os(self) -> None:
-        # if sys.platform == "win32":
-        #     raise
-        ...
+        if not platform.system() == 'Linux':
+            raise NotSupportedOsError
 
     def _read_user_input(self) -> None:
         log.info(lexicon.logger.start_reading_user_input)
@@ -117,5 +118,5 @@ class Application:
 
 
 if __name__ == '__main__':
-    app = Application(CliParser)
-    print(app._get_history_logs())
+    with Application(CliParser) as app:
+        app.start()
