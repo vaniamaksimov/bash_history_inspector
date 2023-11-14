@@ -11,21 +11,24 @@ from app.lexicon import lexicon
 from app.logger import get_logger
 from app.models.log import Log
 from app.models.log_container import LogContainer
-from app.utils.application_types import ApplicationMode
-from app.utils.errors import NotSupportedOsError
+from app.utils.application_types import ApplicationMode, UserOS
+from app.utils.errors import InvalidArgumentError, NotSupportedOsError
 
 log = get_logger('application')
 config = Config()
 
 
 class Application:
-    def __init__(self, cli_parser: type[CliParser]) -> None:
-        log.info(lexicon.logger.init_application)
-        self.cli_parser = cli_parser()
+    def __init__(self) -> None:
+        self.cli_parser = CliParser()
 
     def _check_user_os(self) -> None:
-        if not platform.system() == 'Linux':
+        log.info(lexicon.logger.start_check_user_os)
+        user_platform = platform.system()
+        log.info(lexicon.logger.user_os(user_platform))
+        if not user_platform == UserOS.LINUX:
             raise NotSupportedOsError
+        log.info(lexicon.logger.user_os_ok)
 
     def _read_user_input(self) -> None:
         log.info(lexicon.logger.start_reading_user_input)
@@ -88,7 +91,15 @@ class Application:
         return container
 
     def _start_mode(self):
-        ...
+        bashrc = self._create_file_if_not_exists(filename='.bashrc')
+        if self._file_contains_text(bashrc, 'HISTTIMEFORMAT'):
+            self._replace_line_with_text(bashrc, line='HISTTIMEFORMAT')
+        else:
+            self._append_text_to_file(bashrc)
+        if config.mode == ApplicationMode.HISTORY:
+            print('HISTORY')
+        else:
+            print('CRON')
 
     def _send_syslog(self, message: str) -> None:
         from syslog import syslog
@@ -98,14 +109,10 @@ class Application:
     def start(self):
         self._check_user_os()
         self._read_user_input()
-        file = self._create_file_if_not_exists()
-        if self._file_contains_text(file, 'HISTTIMEFORMAT'):
-            ...
-        else:
-            ...
         self._start_mode()
 
     def __enter__(self):
+        log.info(lexicon.logger.start_application)
         return self
 
     def __exit__(
@@ -114,9 +121,11 @@ class Application:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        ...
-
-
-if __name__ == '__main__':
-    with Application(CliParser) as app:
-        app.start()
+        if not exc_type:
+            log.info(lexicon.logger.stop_application_without_error)
+            sys.exit(0)
+        if isinstance(exc_val, NotSupportedOsError):
+            log.error(lexicon.logger.user_os_not_ok)
+        elif isinstance(exc_val, InvalidArgumentError):
+            log.error(lexicon.logger.invalid_cli_argument)
+        # sys.exit(1)

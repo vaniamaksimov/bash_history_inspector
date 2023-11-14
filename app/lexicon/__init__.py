@@ -16,31 +16,55 @@ class LexiconContainer(ABC):
 
 class LoggerLexicon(LexiconContainer):
     start_application = {'en_US': 'Starting application', 'ru_RU': 'Инициализируем приложение'}
-    start_configurate_arg_parser = {
-        'en_US': 'Start configurating argument parser',
-        'ru_RU': 'Начинаем инициализацию парсера аргументов',
-    }
     start_reading_user_input = {
         'en_US': 'Start reading user input',
         'ru_RU': 'Начинаем чтение пользовательского ввода',
+    }
+    start_check_user_os = {
+        'en_US': 'Start checking user os',
+        'ru_RU': 'Проверяем пользовательскую операционную систему',
     }
     init_application = {
         'en_US': 'Initialize new application instance',
         'ru_RU': 'Инициализируем новый экземпляр приложения',
     }
+    user_os = {
+        'en_US': lambda os: f'User os is {os}',
+        'ru_RU': lambda os: f'Операционная система пользователя {os}',
+    }
+    user_os_ok = {
+        'en_US': 'User os accepted',
+        'ru_RU': 'Пользовательская операционная система принята',
+    }
+    stop_application_without_error = {
+        'en_US': 'Stop application without errors',
+        'ru_RU': 'Останавливаем приложение без внутренних ошибок',
+    }
+    user_os_not_ok = {
+        'en_US': 'Not supported user os',
+        'ru_RU': 'Пользовательская операционная система не поддерживается',
+    }
+    invalid_cli_argument = {
+        'en_US': 'Invalid cli argument',
+        'ru_RU': 'Передан неверный аргумент командной строки',
+    }
+    succesfull_read_user_input = {
+        'en_US': 'Succesfull read user input',
+        'ru_RU': 'Пользовательский ввод успешно прочитан',
+    }
 
 
 class ArgumentParserLexicon(LexiconContainer):
     program_name = {
-        'en_US': 'Bash history inspector',
-        'ru_RU': 'Инспектор bash истории',
+        'en_US': 'python history_inspector.py',
+        'ru_RU': 'python history_inspector.py',
     }
     program_description = {
         'en_US': 'Reading bash history and check for bad commands',
         'ru_RU': 'Читает историю bash команд и ищет команды способные привести в взлому',
     }
-    program_epilog = {'en_US': 'CLI arguments:', 'ru_RU': 'Аргументы командной строки'}
     mode_selection = {'en_US': 'Operating mode selection', 'ru_RU': 'Выбор режима работы'}
+    cron_help = {'en_US': 'Cron time selection in minutes', 'ru_RU': 'Выбор времени cron в минутах'}
 
 
 class Lexicon:

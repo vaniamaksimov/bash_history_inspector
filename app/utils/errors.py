@@ -12,3 +12,7 @@ class LogParseError(ApplicationError):
 
 class NotSupportedOsError(ApplicationError):
     ...
+
+
+class InvalidArgumentError(ApplicationError):
+    ...

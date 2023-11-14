@@ -28,7 +28,7 @@ def fake_lexicon() -> type[FakeLexicon]:
 
 @pytest.fixture
 def application() -> Application:
-    return Application(cli_parser=CliParser)
+    return Application()
 
 
 @pytest.fixture
