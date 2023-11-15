@@ -16,3 +16,7 @@ class NotSupportedOsError(ApplicationError):
 
 class InvalidArgumentError(ApplicationError):
     ...
+
+
+class NotSupportedModeError(ApplicationError):
+    ...

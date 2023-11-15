@@ -4,7 +4,8 @@ from app.cli import CliParser
 
 
 @pytest.mark.parametrize(
-    argnames=['command', 'expected'], argvalues=[[['cron'], 'cron'], [['history'], 'history']]
+    argnames=['command', 'expected'],
+    argvalues=[[['cron', '-m', '5'], 'cron'], [['history'], 'history']],
 )
 def test_argument_parser(argument_parser: CliParser, command: list[str], expected: str):
     namespace = argument_parser.argument_parser.parse_args(command)

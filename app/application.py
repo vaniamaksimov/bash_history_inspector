@@ -12,7 +12,7 @@ from app.logger import get_logger
 from app.models.log import Log
 from app.models.log_container import LogContainer
 from app.utils.application_types import ApplicationMode, UserOS
-from app.utils.errors import InvalidArgumentError, NotSupportedOsError
+from app.utils.errors import InvalidArgumentError, NotSupportedModeError, NotSupportedOsError
 
 log = get_logger('application')
 config = Config()
@@ -39,36 +39,42 @@ class Application:
                 config.mode = ApplicationMode.CRON
             case ApplicationMode.HISTORY:
                 config.mode = ApplicationMode.HISTORY
-            case _ as unreachable:
-                raise AssertionError(unreachable)
+            case _:
+                raise NotSupportedModeError
 
     def _create_file_if_not_exists(self, filename: str = '.bashrc') -> Path:
         file = Path.home() / filename
         if file.is_file():
-            log.info('found file')
+            log.info(lexicon.logger.found_file(filename))
         else:
-            log.info(f'create {filename} file')
-            file.touch(exist_ok=True)
+            log.info(lexicon.logger.create_file(filename))
+            file.touch()
         return file
 
     def _file_contains_text(self, file: Path | str, text: str) -> bool:
+        log.info(lexicon.logger.start_check_file_for_text(file, text))
         with open(file) as file_:
             for line in file_:
                 if text in line:
+                    log.info(lexicon.logger.file_contains_text(file, text))
                     return True
+            log.info(lexicon.logger.file_not_contains_text(file, text))
             return False
 
     def _replace_line_with_text(
         self, file: Path | str, line: str, text: str = 'HISTTIMEFORMAT="%d/%m/%y %T "'
     ) -> None:
+        log.info(lexicon.logger.start_replace_line_with_text(file, line, text))
         for line_ in fileinput.input(file, inplace=True):
             if line in line_:
+                log.info(lexicon.logger.line_replaced(file, line_, text))
                 line_ = line_.replace(line_, text)
             sys.stdout.write(line_)
 
     def _append_text_to_file(
         self, file: Path | str, text: str = 'HISTTIMEFORMAT="%d/%m/%y %T "'
     ) -> None:
+        log.info(lexicon.logger.append_text_to_file(file, text))
         with open(file, 'a') as file_:
             file_.write('\n')
             file_.write(text)
@@ -128,4 +134,6 @@ class Application:
             log.error(lexicon.logger.user_os_not_ok)
         elif isinstance(exc_val, InvalidArgumentError):
             log.error(lexicon.logger.invalid_cli_argument)
+        elif isinstance(exc_val, NotSupportedModeError):
+            log.error(lexicon.logger.not_supported_mode_error)
         # sys.exit(1)
