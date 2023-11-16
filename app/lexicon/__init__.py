@@ -1,6 +1,8 @@
 import locale
 from abc import ABC
-from typing import Any
+from typing import Any, Callable
+
+from app.models.log import Log
 
 
 class LexiconContainer(ABC):
@@ -91,6 +93,21 @@ class LoggerLexicon(LexiconContainer):
     append_text_to_file = {
         'en_US': lambda file, text: f'Appendind text {text} to file {file}',
         'ru_RU': lambda file, text: f'Добавляем текст {text} в файл {file}',
+    }
+    get_logs = {'en_US': 'Get logs from history', 'ru_RU': 'Получаем логи из истории'}
+    convert_logs_to_log_container = {
+        'en_US': 'Start converting raw logs to LogContainer structure',
+        'ru_RU': 'Начинаем конвертацию логов в структуру данных LogContainer',
+    }
+    interrupt_by_user = {
+        'en_US': 'Program interrupted by user',
+        'ru_RU': 'Остановка выполнения программы пользователем',
+    }
+    find_dangerous_log: dict[str, Callable[[Log], str]] = {
+        'en_US': lambda log: f'Find dangerous log: log text: {log.cmd} / log time: {log.invoke_at}',
+        'ru_RU': lambda log: (
+            f'Найдена подозрительная лог запись: текст лога: {log.cmd} / время лога: {log.invoke_at}'
+        ),
     }
 
 

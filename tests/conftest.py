@@ -7,6 +7,7 @@ import pytest
 from app.application import Application
 from app.cli import CliParser
 from app.lexicon import Lexicon, LexiconContainer
+from app.log_inspector.standart_library_inspector import StandartLibraryInspector
 
 
 class FakeLexiconContainer(LexiconContainer):
@@ -27,8 +28,13 @@ def fake_lexicon() -> type[FakeLexicon]:
 
 
 @pytest.fixture
-def application() -> Application:
-    return Application()
+def log_inspector() -> StandartLibraryInspector:
+    return StandartLibraryInspector()
+
+
+@pytest.fixture
+def application(log_inspector) -> Application:
+    return Application(log_inspector)
 
 
 @pytest.fixture
