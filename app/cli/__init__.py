@@ -26,7 +26,7 @@ class CliParser:
             '-m',
             '--minutes',
             dest='minutes',
-            choices=[5, 15, 30],
+            choices=[1, 5, 15, 30],
             type=int,
             help=lexicon.argument_parser.cron_help,
             required=True,

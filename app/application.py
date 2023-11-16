@@ -2,7 +2,10 @@ import fileinput
 import platform
 import subprocess
 import sys
+from copy import copy
+from datetime import datetime, timedelta
 from pathlib import Path
+from time import sleep
 from types import TracebackType
 from typing import TypeVar
 
@@ -115,7 +118,23 @@ class Application:
                 self._send_syslog(log.cmd)
 
     def _start_cron_mode(self):
-        ...
+        start_time = datetime.now()
+        next_start = start_time + timedelta(minutes=config.timeout)
+        while True:
+            if datetime.now() < next_start:
+                sleep(1)
+                logger.info('wait for start')
+            else:
+                raw_logs = self._get_history_logs()
+                logs = self._convert_raw_logs_to_log_container(raw_logs).pop_logs_before_timestamp(
+                    start_time
+                )
+                for log in logs:
+                    if self.log_inspector.check_for_dangerous(log):
+                        logger.info(lexicon.logger.find_dangerous_log(log))
+                        self._send_syslog(log.cmd)
+                start_time = copy(next_start)
+                next_start = start_time + timedelta(minutes=config.timeout)
 
     def _start_mode(self):
         bashrc = self._create_file_if_not_exists(filename='.bashrc')
@@ -160,4 +179,4 @@ class Application:
             logger.error(lexicon.logger.not_supported_mode_error)
         elif isinstance(exc_val, KeyboardInterrupt):
             logger.info(lexicon.logger.interrupt_by_user)
-        # sys.exit(1)
+        sys.exit(1)
