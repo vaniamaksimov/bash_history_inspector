@@ -5,8 +5,9 @@ from app.models.log import Log
 
 
 class LogContainer(UserList[Log]):
-    def pop_logs_before_timestamp(self, timestamp: datetime) -> 'LogContainer':
-        for index, log in enumerate(self):
-            if log.invoke_at < timestamp:
-                self.pop(index)
-        return self
+    def get_logs_after_timestamp(self, timestamp: datetime) -> 'LogContainer':
+        logs = LogContainer()
+        for log in self:
+            if log.invoke_at > timestamp:
+                logs.append(log)
+        return logs

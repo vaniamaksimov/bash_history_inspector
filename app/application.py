@@ -1,6 +1,5 @@
 import fileinput
 import platform
-import subprocess
 import sys
 from copy import copy
 from datetime import datetime, timedelta
@@ -87,56 +86,50 @@ class Application:
             file_.write('\n')
             file_.write(text)
 
-    def __clean_logs(self, raw_logs: bytes) -> list[str]:
-        return list(map(str.strip, raw_logs.decode().splitlines()))
-
-    def _get_history_logs(self) -> list[str]:
+    def _get_history_logs(self, file_name: str = '.bash_history') -> LogContainer:
         logger.info(lexicon.logger.get_logs)
-        cmd = subprocess.Popen(
-            'bash -i -c \'history -r;history\' ',
-            shell=True,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        )
-        raw_output, _ = cmd.communicate()
-        return self.__clean_logs(raw_output)
+        logs = LogContainer()
+        file = Path.home() / file_name
+        with open(file, 'r') as history_file:
+            log_time = None
+            for line in history_file:
+                if line.startswith('#'):
+                    log_time = datetime.fromtimestamp(float(line.removeprefix('#')))
+                else:
+                    logs.append(
+                        Log(
+                            invoke_at=log_time if log_time else config.start_time,
+                            cmd=line.removesuffix('\n'),
+                        )
+                    )
+                    log_time = None
+        return logs
 
-    def _convert_raw_logs_to_log_container(self, raw_logs: list[str]) -> LogContainer:
-        logger.info(lexicon.logger.convert_logs_to_log_container)
-        container = LogContainer()
-        for raw_log in raw_logs:
-            container.append(Log.from_string(raw_log))
-        return container
-
-    def _start_history_mode(self):
-        raw_logs = self._get_history_logs()
-        logs = self._convert_raw_logs_to_log_container(raw_logs)
+    def _start_history_mode(self) -> None:
+        config.start_time = datetime.now()
+        logs = self._get_history_logs()
         for log in logs:
             if self.log_inspector.check_for_dangerous(log):
                 logger.info(lexicon.logger.find_dangerous_log(log))
                 self._send_syslog(log.cmd)
 
     def _start_cron_mode(self):
-        start_time = datetime.now()
-        next_start = start_time + timedelta(minutes=config.timeout)
+        config.start_time = datetime.now()
+        config.next_start = config.start_time + timedelta(minutes=config.timeout)
         while True:
-            if datetime.now() < next_start:
+            if datetime.now() < config.next_start:
                 sleep(1)
                 logger.info('wait for start')
             else:
-                raw_logs = self._get_history_logs()
-                logs = self._convert_raw_logs_to_log_container(raw_logs).pop_logs_before_timestamp(
-                    start_time
-                )
+                logs = self._get_history_logs().get_logs_after_timestamp(config.start_time)
                 for log in logs:
                     if self.log_inspector.check_for_dangerous(log):
                         logger.info(lexicon.logger.find_dangerous_log(log))
                         self._send_syslog(log.cmd)
-                start_time = copy(next_start)
-                next_start = start_time + timedelta(minutes=config.timeout)
+                config.start_time = copy(config.next_start)
+                config.next_start = config.start_time + timedelta(minutes=config.timeout)
 
-    def _start_mode(self):
+    def _start_mode(self) -> None:
         bashrc = self._create_file_if_not_exists(filename='.bashrc')
         if self._file_contains_text(bashrc, 'HISTTIMEFORMAT'):
             self._replace_line_with_text(bashrc, line='HISTTIMEFORMAT')
@@ -158,7 +151,7 @@ class Application:
         self._read_user_input()
         self._start_mode()
 
-    def __enter__(self):
+    def __enter__(self) -> 'Application':
         logger.info(lexicon.logger.start_application)
         return self
 
