@@ -141,10 +141,9 @@ class Application:
             self._start_cron_mode()
 
     def _send_syslog(self, message: str) -> None:
-        # from syslog import syslog
+        from syslog import syslog
 
-        # syslog(message)
-        print(message)
+        syslog(message)
 
     def start(self):
         self._check_user_os()
