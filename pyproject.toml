@@ -13,7 +13,6 @@ python = "^3.10"
 ruff = "^0.0.292"
 black = "^23.9.1"
 pytest = "^7.4.2"
-ipykernel = "^6.26.0"
 
 [build-system]
 requires = ["poetry-core"]
