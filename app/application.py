@@ -18,10 +18,10 @@ from app.models.log_container import LogContainer
 from app.utils.application_types import ApplicationMode, UserOS
 from app.utils.errors import InvalidArgumentError, NotSupportedModeError, NotSupportedOsError
 
-logger = get_logger('application')
+logger = get_logger("application")
 config = Config()
 
-LogInspectorAdaper = TypeVar('LogInspectorAdaper', bound=AbstractLogInspector)
+LogInspectorAdaper = TypeVar("LogInspectorAdaper", bound=AbstractLogInspector)
 
 
 class Application:
@@ -49,7 +49,7 @@ class Application:
             case _:
                 raise NotSupportedModeError
 
-    def _create_file_if_not_exists(self, filename: str = '.bashrc') -> Path:
+    def _create_file_if_not_exists(self, filename: str = ".bashrc") -> Path:
         file = Path.home() / filename
         if file.is_file():
             logger.info(lexicon.logger.found_file(filename))
@@ -82,24 +82,24 @@ class Application:
         self, file: Path | str, text: str = 'HISTTIMEFORMAT="%d/%m/%y %T "'
     ) -> None:
         logger.info(lexicon.logger.append_text_to_file(file, text))
-        with open(file, 'a') as file_:
-            file_.write('\n')
+        with open(file, "a") as file_:
+            file_.write("\n")
             file_.write(text)
 
-    def _get_history_logs(self, file_name: str = '.bash_history') -> LogContainer:
+    def _get_history_logs(self, file_name: str = ".bash_history") -> LogContainer:
         logger.info(lexicon.logger.get_logs)
         logs = LogContainer()
         file = Path.home() / file_name
-        with open(file, 'r') as history_file:
+        with open(file, "r") as history_file:
             log_time = None
             for line in history_file:
-                if line.startswith('#'):
-                    log_time = datetime.fromtimestamp(float(line.removeprefix('#')))
+                if line.startswith("#"):
+                    log_time = datetime.fromtimestamp(float(line.removeprefix("#")))
                 else:
                     logs.append(
                         Log(
                             invoke_at=log_time if log_time else config.start_time,
-                            cmd=line.removesuffix('\n'),
+                            cmd=line.removesuffix("\n"),
                         )
                     )
                     log_time = None
@@ -116,23 +116,30 @@ class Application:
     def _start_cron_mode(self):
         config.start_time = datetime.now()
         config.next_start = config.start_time + timedelta(minutes=config.timeout)
+        waiting_message = lexicon.logger.waiting_for_start
+        max_i = 3
         while True:
-            if datetime.now() < config.next_start:
+            i = 1
+            while datetime.now() < config.next_start:
+                sys.stdout.write(f'\r{waiting_message}{"."* i}{" " * (max_i - 1)}')
+                sys.stdout.flush()
                 sleep(1)
-                logger.info('wait for start')
-            else:
-                logs = self._get_history_logs().get_logs_after_timestamp(config.start_time)
-                for log in logs:
-                    if self.log_inspector.check_for_dangerous(log):
-                        logger.info(lexicon.logger.find_dangerous_log(log))
-                        self._send_syslog(log.cmd)
-                config.start_time = copy(config.next_start)
-                config.next_start = config.start_time + timedelta(minutes=config.timeout)
+                i += 1
+                if i > max_i:
+                    i = 1
+            sys.stdout.write("\n")
+            logs = self._get_history_logs().get_logs_after_timestamp(config.start_time)
+            for log in logs:
+                if self.log_inspector.check_for_dangerous(log):
+                    logger.info(lexicon.logger.find_dangerous_log(log))
+                    self._send_syslog(log.cmd)
+            config.start_time = copy(config.next_start)
+            config.next_start = config.start_time + timedelta(minutes=config.timeout)
 
     def _start_mode(self) -> None:
-        bashrc = self._create_file_if_not_exists(filename='.bashrc')
-        if self._file_contains_text(bashrc, 'HISTTIMEFORMAT'):
-            self._replace_line_with_text(bashrc, line='HISTTIMEFORMAT')
+        bashrc = self._create_file_if_not_exists(filename=".bashrc")
+        if self._file_contains_text(bashrc, "HISTTIMEFORMAT"):
+            self._replace_line_with_text(bashrc, line="HISTTIMEFORMAT")
         else:
             self._append_text_to_file(bashrc)
         if config.mode == ApplicationMode.HISTORY:
@@ -150,7 +157,7 @@ class Application:
         self._read_user_input()
         self._start_mode()
 
-    def __enter__(self) -> 'Application':
+    def __enter__(self) -> "Application":
         logger.info(lexicon.logger.start_application)
         return self
 
